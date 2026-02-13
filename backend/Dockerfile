@@ -1,7 +1,7 @@
 FROM node:20-bullseye AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 FROM node:20-bullseye AS build
 WORKDIR /app
@@ -17,7 +17,7 @@ ENV PORT=3003
 ENV DATABASE_URL=file:/data/subman.db
 
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
