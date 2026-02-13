@@ -1,0 +1,156 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 100%;
+}
+
+.tabs-shell {
+  position: relative;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+.tabs-shell ion-router-outlet {
+  display: block;
+  height: 100%;
+  padding-top: calc(env(safe-area-inset-top) + 8px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 86px);
+}
+
+.update-banner {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 8px);
+  left: 12px;
+  right: 12px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid #bfdbfe;
+  background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.16);
+}
+
+.update-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.update-copy strong {
+  font-size: 0.8rem;
+  color: #1e3a8a;
+}
+
+.update-copy span {
+  font-size: 0.72rem;
+  color: #1d4ed8;
+}
+
+.update-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.update-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.update-btn.secondary {
+  color: #1e3a8a;
+  background: #e0e7ff;
+}
+
+.update-btn.primary {
+  color: #fff;
+  background: #1d4ed8;
+}
+
+.custom-bottom-nav {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(env(safe-area-inset-bottom) + 8px);
+  z-index: 30;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px;
+  border-radius: 18px;
+  border: 1px solid #dbe3f0;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.14);
+  backdrop-filter: blur(10px);
+}
+
+.nav-item {
+  flex: 1 1 0;
+  min-height: 58px;
+  padding: 8px 4px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: #475569;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  cursor: pointer;
+}
+
+.nav-item ion-icon {
+  font-size: 18px;
+}
+
+.nav-item.active {
+  color: #ffffff;
+  background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+  box-shadow: 0 8px 18px rgba(29, 78, 216, 0.34);
+}
+
+:host-context(.dark) .custom-bottom-nav {
+  border-color: #1f2937;
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.44);
+}
+
+:host-context(.dark) .update-banner {
+  border-color: #1d4ed8;
+  background: #1e293b;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+:host-context(.dark) .update-copy strong {
+  color: #dbeafe;
+}
+
+:host-context(.dark) .update-copy span {
+  color: #93c5fd;
+}
+
+:host-context(.dark) .update-btn.secondary {
+  color: #dbeafe;
+  background: #334155;
+}
+
+:host-context(.dark) .nav-item {
+  color: #94a3b8;
+}
+
+:host-context(.dark) .nav-item.active {
+  color: #ffffff;
+  background: linear-gradient(180deg, #4f7cff 0%, #365ee8 100%);
+  box-shadow: 0 9px 18px rgba(79, 124, 255, 0.4);
+}

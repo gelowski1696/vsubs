@@ -1,0 +1,62 @@
+<ion-header class="modal-header">
+  <ion-toolbar>
+    <ion-title>{{ customer ? 'Edit Customer' : 'Add Customer' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding modal-content">
+  <div class="form-stack">
+    <ion-item lines="none" class="field">
+      <ion-label position="stacked">Full name</ion-label>
+      <ion-input
+        [(ngModel)]="form.fullName"
+        autocomplete="name"
+        placeholder="Juan Dela Cruz"
+      ></ion-input>
+    </ion-item>
+
+    <ion-item lines="none" class="field">
+      <ion-label position="stacked">Email</ion-label>
+      <ion-input
+        [(ngModel)]="form.email"
+        type="email"
+        autocomplete="email"
+        placeholder="juan@example.com"
+      ></ion-input>
+    </ion-item>
+
+    <ion-item lines="none" class="field">
+      <ion-label position="stacked">Phone</ion-label>
+      <ion-input
+        [(ngModel)]="form.phone"
+        type="tel"
+        autocomplete="tel"
+        placeholder="+63 9xx xxx xxxx"
+      ></ion-input>
+    </ion-item>
+
+    <ion-item lines="none" class="field">
+      <ion-label position="stacked">Notes</ion-label>
+      <ion-textarea
+        [(ngModel)]="form.notes"
+        placeholder="Optional notes"
+        autoGrow="true"
+      ></ion-textarea>
+    </ion-item>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="!form.fullName.trim()"
+      (click)="save()"
+    >
+      {{ customer ? 'Save Changes' : 'Create Customer' }}
+    </button>
+  </div>
+</ion-content>

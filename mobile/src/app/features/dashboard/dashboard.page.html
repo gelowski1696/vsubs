@@ -1,0 +1,52 @@
+<ion-content class="ion-padding">
+  <section class="page-directory-intro">
+    <div>
+      <h2>Dashboard Overview</h2>
+      <p>Subscription overview and key metrics.</p>
+    </div>
+    <div class="page-directory-actions">
+      <button
+        type="button"
+        class="refresh-btn refresh-btn-icon"
+        [class.is-loading]="loading"
+        (click)="refresh()"
+        aria-label="Refresh dashboard"
+      >
+        <ion-icon name="refresh-outline"></ion-icon>
+      </button>
+    </div>
+  </section>
+
+  <p class="sync-text" *ngIf="updatedAt">Updated {{ updatedAt }}</p>
+  <p class="error-text" *ngIf="error">{{ error }}</p>
+
+  <div class="kpi-grid">
+    <article class="kpi-card">
+      <p class="kpi-label">Customers</p>
+      <p class="kpi-value">{{ kpis.customers }}</p>
+    </article>
+    <article class="kpi-card">
+      <p class="kpi-label">Active Subs</p>
+      <p class="kpi-value">{{ kpis.active }}</p>
+    </article>
+    <article class="kpi-card">
+      <p class="kpi-label">Ending Soon</p>
+      <p class="kpi-value">{{ kpis.endingSoon }}</p>
+    </article>
+  </div>
+
+  <section class="map-card">
+    <div class="map-head">
+      <div>
+        <h3>Customer Locations</h3>
+        <p>Live map of pinned customer store locations.</p>
+      </div>
+      <div class="map-meta">
+        <span>Pinned: {{ mappedCustomers }}</span>
+        <span *ngIf="unmappedCustomers > 0">Unmapped: {{ unmappedCustomers }}</span>
+      </div>
+    </div>
+    <div #customerMapHost class="customer-map"></div>
+    <p class="map-status" *ngIf="mapBusy">Resolving addresses and plotting markers...</p>
+  </section>
+</ion-content>

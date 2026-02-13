@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String   @id @default(uuid())
+  clientId         String
+  email            String
+  passwordHash     String
+  role             String   @default("STAFF")
+  refreshTokenHash String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([clientId, email])
+  @@index([clientId, createdAt])
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  clientId  String
+  fullName  String
+  email     String?
+  phone     String?
+  storeName String?
+  storeLocation String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscriptions Subscription[]
+
+  @@unique([clientId, email])
+  @@index([clientId, createdAt])
+}
+
+model Plan {
+  id            String       @id @default(uuid())
+  clientId      String
+  name          String
+  price         String
+  currency      String       @default("PHP")
+  interval      String
+  intervalCount Int          @default(1)
+  description   String?
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  subscriptions Subscription[]
+
+  @@index([clientId, createdAt])
+}
+
+model Subscription {
+  id              String             @id @default(uuid())
+  clientId        String
+  customerId      String
+  planId          String
+  startDate       DateTime
+  endDate         DateTime?
+  status          String             @default("ACTIVE")
+  autoRenew       Boolean            @default(true)
+  nextBillingDate DateTime?
+  cancelReason    String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  plan     Plan     @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([clientId, status])
+  @@index([clientId, nextBillingDate])
+  @@index([clientId, endDate])
+  @@index([clientId, createdAt])
+}
+
+model WebhookEndpoint {
+  id        String         @id @default(uuid())
+  clientId  String
+  url       String
+  secret    String
+  events    String         @default("")
+  isActive  Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  deliveries WebhookDelivery[]
+
+  @@index([clientId, createdAt])
+}
+
+model WebhookDelivery {
+  id              String                @id @default(uuid())
+  clientId        String
+  endpointId      String
+  event           String
+  payload         String
+  signature       String
+  attemptCount    Int                   @default(0)
+  status          String                @default("PENDING")
+  nextRetryAt     DateTime?
+  lastError       String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  endpoint WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, status, nextRetryAt])
+  @@index([clientId, createdAt])
+}
+
+model ApiClient {
+  id         String   @id @default(uuid())
+  clientId   String
+  name       String
+  apiKeyHash String
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([clientId, createdAt])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  clientId  String
+  actorType String
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String?
+  metadata  String?
+  createdAt DateTime @default(now())
+
+  @@index([clientId, createdAt])
+}
+
+model MobileRelease {
+  id                          String               @id @default(uuid())
+  clientId                    String
+  platform                    String
+  channel                     String               @default("stable")
+  appVersion                  String
+  bundleVersion               String
+  releaseNotes                String?
+  mandatory                   Boolean              @default(false)
+  minimumSupportedAppVersion  String?
+  isPublished                 Boolean              @default(false)
+  publishedAt                 DateTime?
+  createdAt                   DateTime             @default(now())
+  updatedAt                   DateTime             @updatedAt
+
+  assets MobileReleaseAsset[]
+  events MobileUpdateEvent[]
+
+  @@index([clientId, platform, channel, isPublished, publishedAt])
+  @@index([clientId, createdAt])
+}
+
+model MobileReleaseAsset {
+  id             String        @id @default(uuid())
+  releaseId      String
+  clientId       String
+  filePath       String
+  checksumSha256 String
+  sizeBytes      Int
+  mimeType       String
+  createdAt      DateTime      @default(now())
+
+  release MobileRelease @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, createdAt])
+  @@index([releaseId])
+}
+
+model MobileUpdateEvent {
+  id            String        @id @default(uuid())
+  clientId      String
+  releaseId     String?
+  eventType     String
+  appVersion    String
+  bundleVersion String
+  deviceId      String?
+  message       String?
+  createdAt     DateTime      @default(now())
+
+  release MobileRelease? @relation(fields: [releaseId], references: [id], onDelete: SetNull)
+
+  @@index([clientId, createdAt])
+  @@index([clientId, eventType, createdAt])
+}

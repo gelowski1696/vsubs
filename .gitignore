@@ -1,0 +1,9 @@
+node_modules
+.angular/
+dist/
+**/dist/
+**/build/
+**/.cache/
+backend/prisma/dev.db
+mobile/android_old_*
+*.log

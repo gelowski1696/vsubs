@@ -1,0 +1,70 @@
+:host {
+  display: block;
+}
+
+.modal-header ion-toolbar {
+  --background: #ffffff;
+  --border-width: 0;
+}
+
+.modal-content {
+  --background: #f8fafc;
+}
+
+.form-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.field {
+  --background: #ffffff;
+  border: 1px solid #dbe3f0;
+  border-radius: 12px;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.btn {
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.btn-primary {
+  color: #fff;
+  background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+}
+
+.btn-secondary {
+  color: #1e293b;
+  background: #e2e8f0;
+}
+
+:host-context(.dark) .modal-header ion-toolbar {
+  --background: #0f172a;
+}
+
+:host-context(.dark) .modal-content {
+  --background: #020617;
+}
+
+:host-context(.dark) .field {
+  --background: #0f172a;
+  border-color: #1f2937;
+}
+
+:host-context(.dark) .btn-secondary {
+  color: #e2e8f0;
+  background: #1f2937;
+}

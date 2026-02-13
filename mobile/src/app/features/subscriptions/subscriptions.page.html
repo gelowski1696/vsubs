@@ -1,0 +1,137 @@
+<ion-content class="ion-padding">
+  <section class="page-directory-intro">
+    <div>
+      <h2>Subscription Management</h2>
+      <p>Track lifecycle status, billing dates, and actions.</p>
+    </div>
+    <div class="page-directory-actions">
+      <button type="button" class="btn btn-primary" (click)="createSubscription()">Add Subscription</button>
+      <button
+        type="button"
+        class="btn btn-secondary btn-icon"
+        [class.is-loading]="loading"
+        (click)="load()"
+        aria-label="Refresh subscriptions"
+      >
+        <ion-icon name="refresh-outline"></ion-icon>
+      </button>
+    </div>
+  </section>
+
+  <section class="status-row">
+    <span class="status-badge stale" *ngIf="stale">Offline cache</span>
+    <span class="status-badge loading" *ngIf="loading">Syncing...</span>
+    <span class="status-badge error" *ngIf="errorMessage">{{ errorMessage }}</span>
+    <span class="updated" *ngIf="lastUpdated">Updated {{ lastUpdated | date:'shortTime' }}</span>
+  </section>
+
+  <section class="filter-row">
+    <button
+      type="button"
+      class="chip"
+      *ngFor="let filter of statusFilters"
+      [class.active]="status === filter"
+      (click)="setStatusFilter(filter)"
+    >
+      {{ filter === 'ALL' ? 'All' : formatStatus(filter) }}
+    </button>
+  </section>
+
+  <section class="empty-state" *ngIf="!loading && subscriptions.length === 0">
+    <h3>No subscriptions found</h3>
+    <p>Create your first subscription to start tracking renewals and billing status.</p>
+    <button type="button" class="btn btn-primary" (click)="createSubscription()">Create First Subscription</button>
+  </section>
+
+  <section class="subscription-grid" *ngIf="subscriptions.length > 0">
+    <article class="subscription-card" *ngFor="let s of subscriptions">
+      <div class="subscription-main">
+        <div>
+          <h3>{{ s.customer?.fullName || 'Unknown customer' }}</h3>
+          <p>{{ s.plan?.name || 'Unknown plan' }}</p>
+          <p *ngIf="s.nextBillingDate">Next billing: {{ s.nextBillingDate | date:'mediumDate' }}</p>
+        </div>
+        <div class="pill-stack">
+          <span class="status-pill" [class]="(s.status || 'UNKNOWN').toLowerCase()">{{ formatStatus(s.status) }}</span>
+          <span class="ending-pill" *ngIf="isEndingSoon(s)">Ending Soon</span>
+        </div>
+      </div>
+      <div class="action-row">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="editSubscription(s)">Edit</button>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="pause(s.id)" [disabled]="!canPause(s)">Pause</button>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="resume(s.id)" [disabled]="!canResume(s)">Resume</button>
+        <button type="button" class="btn btn-danger btn-sm" (click)="openCancel(s)" [disabled]="!canCancel(s)">Cancel</button>
+      </div>
+    </article>
+  </section>
+
+  <div class="skeleton-grid" *ngIf="loading && subscriptions.length === 0">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3]"></div>
+  </div>
+
+  <div class="confirm-backdrop" *ngIf="formOpen">
+    <div class="form-dialog">
+      <h3>{{ editingSubscriptionId ? 'Edit Subscription' : 'Create Subscription' }}</h3>
+      <div class="form-grid">
+        <label class="field-label">
+          Customer
+          <select [(ngModel)]="formModel.customerId">
+            <option value="" disabled>Select customer</option>
+            <option *ngFor="let customer of customers" [value]="customer.id">{{ customer.fullName }}</option>
+          </select>
+        </label>
+        <label class="field-label">
+          Plan
+          <select [(ngModel)]="formModel.planId">
+            <option value="" disabled>Select plan</option>
+            <option *ngFor="let plan of plans" [value]="plan.id">{{ plan.name }}</option>
+          </select>
+        </label>
+        <div class="grid-2">
+          <label class="field-label">
+            Start Date
+            <input type="date" [(ngModel)]="formModel.startDate" />
+          </label>
+          <label class="field-label">
+            Status
+            <select [(ngModel)]="formModel.status">
+              <option *ngFor="let state of createStatuses" [value]="state">{{ formatStatus(state) }}</option>
+            </select>
+          </label>
+        </div>
+        <label class="toggle-field">
+          <input type="checkbox" [(ngModel)]="formModel.autoRenew" />
+          <span>Auto-renew subscription</span>
+        </label>
+      </div>
+      <div class="confirm-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="!formModel.customerId || !formModel.planId || formSubmitting"
+          (click)="submitForm()"
+        >
+          {{ formSubmitting ? 'Saving...' : (editingSubscriptionId ? 'Save' : 'Create') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirm-backdrop" *ngIf="cancelOpen">
+    <div class="confirm-dialog">
+      <h3>Cancel subscription?</h3>
+      <p>This will set the selected subscription to canceled.</p>
+      <label class="field-label">
+        Reason (optional)
+        <textarea rows="3" [(ngModel)]="cancelReason" placeholder="Enter reason"></textarea>
+      </label>
+      <div class="confirm-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeCancel()">Back</button>
+        <button type="button" class="btn btn-danger" [disabled]="cancelSubmitting" (click)="confirmCancel()">
+          {{ cancelSubmitting ? 'Canceling...' : 'Confirm Cancel' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</ion-content>

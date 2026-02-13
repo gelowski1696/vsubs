@@ -1,0 +1,244 @@
+<ion-content class="ion-padding">
+  <section class="customers-intro">
+    <div>
+      <h2>Customer Management</h2>
+      <p>Manage and sync subscriber records.</p>
+    </div>
+    <div class="intro-actions">
+      <button type="button" class="btn btn-primary" (click)="createCustomer()">
+        Add Customer
+      </button>
+      <button
+        type="button"
+        class="btn btn-secondary btn-icon"
+        [class.is-loading]="loading"
+        (click)="load()"
+        aria-label="Refresh customers"
+      >
+        <ion-icon name="refresh-outline"></ion-icon>
+      </button>
+    </div>
+  </section>
+
+  <section class="status-row">
+    <span class="status-badge stale" *ngIf="stale">Offline cache</span>
+    <span class="status-badge loading" *ngIf="loading">Syncing...</span>
+    <span class="status-badge error" *ngIf="errorMessage"
+      >{{ errorMessage }}</span
+    >
+    <span class="updated" *ngIf="lastUpdated"
+      >Updated {{ lastUpdated | date:'shortTime' }}</span
+    >
+  </section>
+
+  <section class="filters-panel" *ngIf="customers.length > 0">
+    <label class="search-box">
+      <span>Search</span>
+      <input
+        type="search"
+        [(ngModel)]="searchTerm"
+        placeholder="Name, email, phone, store, location"
+      />
+    </label>
+    <div class="filter-chips">
+      <button
+        type="button"
+        class="filter-chip"
+        *ngFor="let filter of filters"
+        [class.active]="activeFilter === filter"
+        (click)="activeFilter = filter"
+      >
+        {{ filterLabel(filter) }}
+      </button>
+      <span class="results-count">{{ filteredCustomers.length }} result{{ filteredCustomers.length === 1 ? '' : 's' }}</span>
+    </div>
+  </section>
+
+  <section class="empty-state" *ngIf="!loading && customers.length === 0">
+    <h3>No customers yet</h3>
+    <p>Create your first customer to start managing subscriptions.</p>
+    <button type="button" class="btn btn-primary" (click)="createCustomer()">
+      Create First Customer
+    </button>
+  </section>
+
+  <section class="empty-state" *ngIf="!loading && customers.length > 0 && filteredCustomers.length === 0">
+    <h3>No matching customers</h3>
+    <p>Try another search term or switch filter to All.</p>
+  </section>
+
+  <section class="customer-grid" *ngIf="customers.length > 0">
+    <article class="customer-card" *ngFor="let c of filteredCustomers; trackBy: trackByCustomer" [class.swiped]="activeSwipeId === c.id">
+      <div class="swipe-actions" aria-hidden="true">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="onSwipeEdit(c, $event)">Edit</button>
+        <button type="button" class="btn btn-danger btn-sm" (click)="onSwipeDelete(c, $event)">Delete</button>
+      </div>
+      <div
+        class="customer-content"
+        (pointerdown)="onCardPointerDown($event, c.id)"
+        (pointermove)="onCardPointerMove($event)"
+        (pointerup)="onCardPointerUp(c)"
+        (pointercancel)="onCardPointerCancel()"
+      >
+        <div class="customer-main">
+          <div class="avatar">{{ getInitials(c.fullName) }}</div>
+          <div class="customer-meta">
+            <h3>{{ c.fullName || 'Unnamed customer' }}</h3>
+            <p>{{ c.storeName || c.email || 'No email provided' }}</p>
+            <small *ngIf="c.phone">{{ c.phone }}</small>
+            <small *ngIf="c.storeName && c.email">{{ c.email }}</small>
+          </div>
+        </div>
+        <div class="store-map" *ngIf="c.storeLocation">
+          <p class="store-location-label">{{ c.storeLocation }}</p>
+          <iframe
+            [src]="getStoreMapEmbedUrl(c.storeLocation)"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Store location map"
+          ></iframe>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <div class="skeleton-grid" *ngIf="loading && customers.length === 0">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3]"></div>
+  </div>
+
+  <div class="confirm-backdrop" *ngIf="deleteTarget">
+    <div class="confirm-dialog">
+      <h3>Delete customer?</h3>
+      <p>
+        This will permanently remove
+        <strong>{{ deleteTarget?.fullName || 'this customer' }}</strong>.
+      </p>
+      <div class="confirm-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelDelete()"
+        >
+          Cancel
+        </button>
+        <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirm-backdrop" *ngIf="formOpen">
+    <div class="form-dialog">
+      <h3>{{ editingCustomerId ? 'Edit Customer' : 'Add Customer' }}</h3>
+      <div class="form-grid">
+        <label class="field-label">
+          Full name
+          <input
+            type="text"
+            [(ngModel)]="formModel.fullName"
+            placeholder="Juan Dela Cruz"
+          />
+        </label>
+        <label class="field-label">
+          Email
+          <input
+            type="email"
+            [(ngModel)]="formModel.email"
+            placeholder="juan@example.com"
+          />
+        </label>
+        <label class="field-label">
+          Phone
+          <input
+            type="tel"
+            [(ngModel)]="formModel.phone"
+            placeholder="+63 9xx xxx xxxx"
+          />
+        </label>
+        <label class="field-label">
+          Store name
+          <input
+            type="text"
+            [(ngModel)]="formModel.storeName"
+            placeholder="Optional store name"
+          />
+        </label>
+        <label class="field-label">
+          Store location
+          <input
+            type="text"
+            [(ngModel)]="formModel.storeLocation"
+            placeholder="Address or place name (optional)"
+          />
+        </label>
+        <div class="location-actions">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="useCurrentLocation()">
+            Use Current Location
+          </button>
+        </div>
+        <app-location-map-picker
+          [location]="formModel.storeLocation"
+          (locationChange)="onFormLocationPicked($event)"
+        ></app-location-map-picker>
+        <label class="field-label">
+          Notes
+          <textarea
+            rows="3"
+            [(ngModel)]="formModel.notes"
+            placeholder="Optional notes"
+          ></textarea>
+        </label>
+      </div>
+      <div class="confirm-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeForm()">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="!formModel.fullName.trim() || formSubmitting"
+          (click)="submitForm()"
+        >
+          {{ formSubmitting ? 'Saving...' : (editingCustomerId ? 'Save' :
+          'Create') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirm-backdrop" *ngIf="viewTarget">
+    <div class="confirm-dialog view-dialog">
+      <h3>Customer Details</h3>
+      <div class="view-grid">
+        <div class="view-row">
+          <span>Name</span>
+          <strong>{{ viewTarget?.fullName || '-' }}</strong>
+        </div>
+        <div class="view-row">
+          <span>Email</span>
+          <strong>{{ viewTarget?.email || '-' }}</strong>
+        </div>
+        <div class="view-row">
+          <span>Phone</span>
+          <strong>{{ viewTarget?.phone || '-' }}</strong>
+        </div>
+        <div class="view-row">
+          <span>Store</span>
+          <strong>{{ viewTarget?.storeName || '-' }}</strong>
+        </div>
+        <div class="view-row">
+          <span>Location</span>
+          <strong>{{ viewTarget?.storeLocation || '-' }}</strong>
+        </div>
+        <div class="view-row">
+          <span>Notes</span>
+          <strong>{{ viewTarget?.notes || '-' }}</strong>
+        </div>
+      </div>
+      <div class="confirm-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeView()">Close</button>
+      </div>
+    </div>
+  </div>
+</ion-content>

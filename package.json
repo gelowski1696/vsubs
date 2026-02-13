@@ -1,0 +1,13 @@
+{
+  "name": "subman",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "mobile",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run -ws build",
+    "test": "npm run -ws test"
+  }
+}

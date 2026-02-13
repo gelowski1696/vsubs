@@ -1,0 +1,120 @@
+<ion-content class="ion-padding">
+  <section class="page-directory-intro">
+    <div>
+      <h2>Plan Catalog</h2>
+      <p>Manage pricing models and billing intervals.</p>
+    </div>
+    <div class="page-directory-actions">
+      <button type="button" class="btn btn-primary" (click)="createPlan()">Add Plan</button>
+      <button
+        type="button"
+        class="btn btn-secondary btn-icon"
+        [class.is-loading]="loading"
+        (click)="load()"
+        aria-label="Refresh plans"
+      >
+        <ion-icon name="refresh-outline"></ion-icon>
+      </button>
+    </div>
+  </section>
+
+  <section class="status-row">
+    <span class="status-badge stale" *ngIf="stale">Offline cache</span>
+    <span class="status-badge loading" *ngIf="loading">Syncing...</span>
+    <span class="status-badge error" *ngIf="errorMessage">{{ errorMessage }}</span>
+    <span class="updated" *ngIf="lastUpdated">Updated {{ lastUpdated | date:'shortTime' }}</span>
+  </section>
+
+  <section class="empty-state" *ngIf="!loading && plans.length === 0">
+    <h3>No plans yet</h3>
+    <p>Create your first pricing plan to start assigning subscriptions.</p>
+    <button type="button" class="btn btn-primary" (click)="createPlan()">Create First Plan</button>
+  </section>
+
+  <section class="plan-grid" *ngIf="plans.length > 0">
+    <article class="plan-card" *ngFor="let plan of plans">
+      <div class="plan-main">
+        <div>
+          <h3>{{ plan.name }}</h3>
+          <p class="price">{{ plan.price }} {{ plan.currency }} / {{ formatInterval(plan) }}</p>
+          <p *ngIf="plan.description" class="desc">{{ plan.description }}</p>
+        </div>
+        <span class="active-pill" [class.inactive]="!plan.isActive">
+          {{ plan.isActive ? 'Active' : 'Inactive' }}
+        </span>
+      </div>
+      <div class="plan-actions">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="editPlan(plan)">Edit</button>
+        <button type="button" class="btn btn-danger btn-sm" (click)="deletePlan(plan)">Delete</button>
+      </div>
+    </article>
+  </section>
+
+  <div class="skeleton-grid" *ngIf="loading && plans.length === 0">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3]"></div>
+  </div>
+
+  <div class="confirm-backdrop" *ngIf="deleteTarget">
+    <div class="confirm-dialog">
+      <h3>Delete plan?</h3>
+      <p>This will permanently remove <strong>{{ deleteTarget?.name || 'this plan' }}</strong>.</p>
+      <div class="confirm-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirm-backdrop" *ngIf="formOpen">
+    <div class="form-dialog">
+      <h3>{{ editingPlanId ? 'Edit Plan' : 'Add Plan' }}</h3>
+      <div class="form-grid">
+        <label class="field-label">
+          Name
+          <input type="text" [(ngModel)]="formModel.name" placeholder="Premium Monthly" />
+        </label>
+        <div class="grid-2">
+          <label class="field-label">
+            Price
+            <input type="text" [(ngModel)]="formModel.price" placeholder="999.00" />
+          </label>
+          <label class="field-label">
+            Currency
+            <input type="text" [(ngModel)]="formModel.currency" placeholder="PHP" />
+          </label>
+        </div>
+        <div class="grid-2">
+          <label class="field-label">
+            Interval
+            <select [(ngModel)]="formModel.interval">
+              <option *ngFor="let interval of intervalOptions" [value]="interval">{{ interval }}</option>
+            </select>
+          </label>
+          <label class="field-label">
+            Interval Count
+            <input type="number" min="1" [(ngModel)]="formModel.intervalCount" />
+          </label>
+        </div>
+        <label class="field-label">
+          Description
+          <textarea rows="3" [(ngModel)]="formModel.description" placeholder="Optional plan notes"></textarea>
+        </label>
+        <label class="toggle-field">
+          <input type="checkbox" [(ngModel)]="formModel.isActive" />
+          <span>Plan is active</span>
+        </label>
+      </div>
+      <div class="confirm-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="!formModel.name.trim() || !formModel.price.trim() || formSubmitting"
+          (click)="submitForm()"
+        >
+          {{ formSubmitting ? 'Saving...' : (editingPlanId ? 'Save' : 'Create') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,13 @@
+:root {
+  --ion-background-color: #f8fafb;
+  --ion-text-color: #10211a;
+  --ion-color-primary: #1f7a53;
+  --surface-card: #ffffff;
+}
+
+:root.dark {
+  --ion-background-color: #101613;
+  --ion-text-color: #e9f5ef;
+  --ion-color-primary: #73d3a4;
+  --surface-card: #16211c;
+}

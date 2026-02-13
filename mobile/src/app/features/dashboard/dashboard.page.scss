@@ -1,0 +1,181 @@
+:host {
+  display: block;
+}
+
+.dash-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.dash-subtitle {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #64748b;
+}
+
+.refresh-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #3563ff, #2448d5);
+}
+
+.refresh-btn-icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.refresh-btn-icon ion-icon {
+  font-size: 1rem;
+}
+
+.refresh-btn-icon.is-loading ion-icon {
+  animation: spin 0.8s linear infinite;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.7;
+}
+
+.sync-text {
+  margin: 0 0 10px;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.error-text {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: #b91c1c;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.kpi-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.kpi-label {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.kpi-value {
+  margin: 4px 0 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.map-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 12px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.map-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.map-head h3 {
+  margin: 0;
+  font-size: 0.94rem;
+  color: #0f172a;
+}
+
+.map-head p {
+  margin: 4px 0 0;
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+.map-meta {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+  font-size: 0.72rem;
+  color: #475569;
+}
+
+.customer-map {
+  width: 100%;
+  height: 260px;
+  border-radius: 12px;
+  border: 1px solid #dbe3f0;
+  overflow: hidden;
+}
+
+.map-status {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+:host-context(.dark) .dash-subtitle {
+  color: #94a3b8;
+}
+
+:host-context(.dark) .kpi-card {
+  background: #111827;
+  border-color: #334155;
+  box-shadow: none;
+}
+
+:host-context(.dark) .map-card {
+  background: #111827;
+  border-color: #334155;
+  box-shadow: none;
+}
+
+:host-context(.dark) .kpi-label {
+  color: #9ca3af;
+}
+
+:host-context(.dark) .kpi-value {
+  color: #e5e7eb;
+}
+
+:host-context(.dark) .map-head h3 {
+  color: #e5e7eb;
+}
+
+:host-context(.dark) .map-head p,
+:host-context(.dark) .map-meta,
+:host-context(.dark) .map-status {
+  color: #9ca3af;
+}
+
+:host-context(.dark) .customer-map {
+  border-color: #334155;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

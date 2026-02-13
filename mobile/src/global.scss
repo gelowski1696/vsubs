@@ -1,0 +1,128 @@
+@import "@ionic/angular/css/core.css";
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+@import "leaflet/dist/leaflet.css";
+
+html, body, ion-app {
+  height: 100%;
+}
+body {
+  margin: 0;
+  background: var(--ion-background-color);
+  color: var(--ion-text-color);
+}
+
+.app-header ion-toolbar,
+ion-header.app-header ion-toolbar {
+  --background: linear-gradient(135deg, #ffffff 0%, #f5f9ff 55%, #edf4ff 100%);
+  --color: var(--ion-text-color);
+  --border-width: 0 0 1px 0;
+  --border-color: #dbe7ff;
+  --min-height: 68px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 4px;
+  --padding-bottom: 4px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.09);
+  position: relative;
+}
+
+.app-header ion-title,
+ion-header.app-header ion-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  padding-inline: 0;
+}
+
+.app-header::after,
+ion-header.app-header::after {
+  content: "";
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, #2563eb 0%, #60a5fa 55%, rgba(96, 165, 250, 0) 100%);
+}
+
+ion-tab-bar.app-tab-bar {
+  --background: var(--surface-card);
+  --border: 1px solid #e2e8f0;
+  --color: #64748b;
+  --color-selected: #1d4ed8;
+  border-top: 1px solid #e2e8f0;
+}
+
+:root.dark .app-header ion-toolbar,
+:root.dark ion-header.app-header ion-toolbar {
+  --background: linear-gradient(135deg, #0f172a 0%, #14233f 55%, #1b2f52 100%);
+  --border-color: #22314f;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42);
+}
+
+:root.dark .app-header::after,
+:root.dark ion-header.app-header::after {
+  background: linear-gradient(90deg, #4f7cff 0%, #7aa2ff 60%, rgba(122, 162, 255, 0) 100%);
+}
+
+:root.dark ion-tab-bar.app-tab-bar {
+  --border: 1px solid #1f2937;
+  --color: #94a3b8;
+  --color-selected: #7aa2ff;
+  border-top-color: #1f2937;
+}
+
+.card-surface {
+  background: var(--surface-card);
+  border-radius: 12px;
+}
+
+.page-directory-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.page-directory-intro h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.page-directory-intro p {
+  margin: 6px 0 0;
+  font-size: 0.86rem;
+  color: #64748b;
+}
+
+.page-directory-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+:root.dark .page-directory-intro h2 {
+  color: #e2e8f0;
+}
+
+:root.dark .page-directory-intro p {
+  color: #94a3b8;
+}
+
+@media (max-width: 480px) {
+  .page-directory-intro {
+    flex-direction: column;
+  }
+
+  .page-directory-actions {
+    width: 100%;
+  }
+}

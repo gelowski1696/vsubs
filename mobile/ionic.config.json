@@ -1,0 +1,8 @@
+{
+  "name": "subman-mobile",
+  "type": "angular",
+  "defaultProject": "mobile",
+  "integrations": {
+    "capacitor": {}
+  }
+}

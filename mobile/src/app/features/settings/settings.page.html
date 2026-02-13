@@ -1,0 +1,114 @@
+<ion-content class="ion-padding settings-content" [scrollY]="true">
+  <section class="page-directory-intro">
+    <div>
+      <h2>Settings & Preferences</h2>
+      <p>Control appearance, preferences, and session actions.</p>
+    </div>
+  </section>
+
+  <section class="settings-card">
+    <h3>Appearance</h3>
+    <p class="card-copy">Choose how V-SUBS looks on your device.</p>
+    <div class="mode-grid">
+      <button type="button" class="mode-btn" [class.active]="mode === 'light'" (click)="onModeChange('light')">
+        <span class="mode-title">Light</span>
+        <span class="mode-sub">Bright interface</span>
+      </button>
+      <button type="button" class="mode-btn" [class.active]="mode === 'dark'" (click)="onModeChange('dark')">
+        <span class="mode-title">Dark</span>
+        <span class="mode-sub">Low-light friendly</span>
+      </button>
+      <button type="button" class="mode-btn" [class.active]="mode === 'system'" (click)="onModeChange('system')">
+        <span class="mode-title">System</span>
+        <span class="mode-sub">Follow device setting</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="settings-card">
+    <h3>Software Update</h3>
+    <p class="card-copy">Check and apply the latest OTA bundle for V-SUBS.</p>
+    <div class="info-grid">
+      <div class="info-row">
+        <span class="info-label">Current Version</span>
+        <strong>{{ appInfo.version }}</strong>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Current Bundle</span>
+        <strong>{{ currentBundleVersion }}</strong>
+      </div>
+      <div class="info-row" *ngIf="latestAppVersion">
+        <span class="info-label">Latest App Version</span>
+        <strong>{{ latestAppVersion }}</strong>
+      </div>
+      <div class="info-row" *ngIf="lastCheckedAt">
+        <span class="info-label">Last Checked</span>
+        <strong>{{ lastCheckedAt | date: 'short' }}</strong>
+      </div>
+    </div>
+
+    <p class="update-note" *ngIf="updateAvailable">
+      {{ updateMandatory ? 'Mandatory update is available.' : 'New update is available.' }}
+    </p>
+    <p class="update-note" *ngIf="releaseNotes">{{ releaseNotes }}</p>
+    <p class="update-note update-error" *ngIf="updateError">{{ updateError }}</p>
+    <p class="update-note" *ngIf="!runtimeAvailable">
+      OTA runtime unavailable on this platform. Use Play Store for full update.
+    </p>
+
+    <div class="update-actions">
+      <button type="button" class="btn btn-secondary" [disabled]="checkingUpdate" (click)="checkForUpdates()">
+        {{ checkingUpdate ? 'Checking...' : 'Check now' }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="!updateAvailable || applyingUpdate || !runtimeAvailable"
+        (click)="applyUpdate()"
+      >
+        {{ applyingUpdate ? 'Applying...' : 'Update now' }}
+      </button>
+    </div>
+  </section>
+
+  <section class="settings-card">
+    <h3>Session</h3>
+    <p class="card-copy">Sign out of this device when you are done.</p>
+    <button type="button" class="btn btn-danger" (click)="openLogoutConfirm()">Logout</button>
+  </section>
+
+  <section class="settings-card">
+    <h3>App Info</h3>
+    <p class="card-copy">Build metadata for this installed app.</p>
+    <div class="app-logo-wrap">
+      <img src="assets/branding/applogo.png" alt="V-SUBS logo" class="app-logo" />
+    </div>
+    <div class="info-grid">
+      <div class="info-row">
+        <span class="info-label">App Name</span>
+        <strong>{{ appInfo.name }}</strong>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Version</span>
+        <strong>{{ appInfo.version }}</strong>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Package ID</span>
+        <strong>{{ appInfo.packageId }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <div class="confirm-backdrop" *ngIf="confirmLogoutOpen">
+    <div class="confirm-dialog">
+      <h3>Logout now?</h3>
+      <p>You will need to sign in again to access your workspace.</p>
+      <div class="confirm-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeLogoutConfirm()">Cancel</button>
+        <button type="button" class="btn btn-danger" [disabled]="loggingOut" (click)="logout()">
+          {{ loggingOut ? 'Logging out...' : 'Logout' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,97 @@
+import java.util.Properties
+import java.io.FileInputStream
+
+apply plugin: 'com.android.application'
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+def resolveSigningValue = { String key ->
+    def envVal = System.getenv(key)
+    if (envVal != null && envVal.trim().length() > 0) {
+        return envVal
+    }
+    def propVal = keystoreProperties.getProperty(key)
+    if (propVal != null && propVal.trim().length() > 0) {
+        return propVal
+    }
+    return null
+}
+
+android {
+    namespace "com.vmjamtech.vsubs"
+    compileSdk rootProject.ext.compileSdkVersion
+    signingConfigs {
+        release {
+            def releaseStoreFile = resolveSigningValue("V_SUBS_KEYSTORE_FILE")
+            def releaseStorePassword = resolveSigningValue("V_SUBS_KEYSTORE_PASSWORD")
+            def releaseKeyAlias = resolveSigningValue("V_SUBS_KEY_ALIAS")
+            def releaseKeyPassword = resolveSigningValue("V_SUBS_KEY_PASSWORD")
+            if (releaseStoreFile && releaseStorePassword && releaseKeyAlias && releaseKeyPassword) {
+                storeFile file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
+    defaultConfig {
+        applicationId "com.vmjamtech.vsubs"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (resolveSigningValue("V_SUBS_KEYSTORE_FILE")
+                    && resolveSigningValue("V_SUBS_KEYSTORE_PASSWORD")
+                    && resolveSigningValue("V_SUBS_KEY_ALIAS")
+                    && resolveSigningValue("V_SUBS_KEY_PASSWORD")) {
+                signingConfig signingConfigs.release
+            } else {
+                throw new GradleException("Missing release signing values. Set V_SUBS_KEYSTORE_FILE, V_SUBS_KEYSTORE_PASSWORD, V_SUBS_KEY_ALIAS, and V_SUBS_KEY_PASSWORD via environment variables or mobile/android/keystore.properties.")
+            }
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}
