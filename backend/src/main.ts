@@ -14,9 +14,20 @@ async function bootstrap() {
   app.setGlobalPrefix('v1', {
     exclude: ['health'],
   });
+  const useHttpsSecurityHeaders = process.env.USE_HTTPS_SECURITY_HEADERS === 'true';
   app.use(
     helmet({
       crossOriginResourcePolicy: false,
+      crossOriginOpenerPolicy: useHttpsSecurityHeaders ? { policy: 'same-origin' } : false,
+      originAgentCluster: useHttpsSecurityHeaders,
+      contentSecurityPolicy: useHttpsSecurityHeaders
+        ? undefined
+        : {
+            useDefaults: true,
+            directives: {
+              'upgrade-insecure-requests': null,
+            },
+          },
     }),
   );
 

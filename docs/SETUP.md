@@ -112,6 +112,7 @@ cp backend/.env.production.example backend/.env.production
 - `DATABASE_URL=file:/data/subman.db`
 - `SEED_ON_BOOT=false` (except first seed run)
 - `CORS_ORIGINS=*` for temporary no-domain phase
+- `USE_HTTPS_SECURITY_HEADERS=false` for temporary HTTP/no-domain phase
 
 ### 4) First deployment
 ```bash
