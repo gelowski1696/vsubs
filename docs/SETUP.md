@@ -113,6 +113,7 @@ cp backend/.env.production.example backend/.env.production
 - `SEED_ON_BOOT=false` (except first seed run)
 - `CORS_ORIGINS=*` for temporary no-domain phase
 - `USE_HTTPS_SECURITY_HEADERS=false` for temporary HTTP/no-domain phase
+- `MOBILE_UPDATE_ALLOW_UNSIGNED_DOWNLOADS=false` (set `true` only if OTA tokenized URL download fails on device)
 
 ### 4) First deployment
 ```bash

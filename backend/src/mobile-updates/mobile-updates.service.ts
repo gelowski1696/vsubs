@@ -37,6 +37,10 @@ export class MobileUpdatesService {
     return process.env.MOBILE_UPDATE_TOKEN_SECRET ?? process.env.JWT_ACCESS_SECRET ?? 'subman-mobile-update-secret';
   }
 
+  allowUnsignedDownloads(): boolean {
+    return process.env.MOBILE_UPDATE_ALLOW_UNSIGNED_DOWNLOADS === 'true';
+  }
+
   createSignedDownloadToken(clientId: string, releaseId: string, ttlSeconds = 900): string {
     const expiresAt = Math.floor(Date.now() / 1000) + ttlSeconds;
     const payload = `${clientId}:${releaseId}:${expiresAt}`;
@@ -306,6 +310,32 @@ export class MobileUpdatesService {
   async readBundleFile(clientId: string, releaseId: string): Promise<{ release: MobileRelease; filePath: string; sizeBytes: number }> {
     const release = await this.prisma.mobileRelease.findFirst({
       where: { id: releaseId, clientId, isPublished: true },
+      include: {
+        assets: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+    });
+    if (!release || release.assets.length === 0) {
+      throw new NotFoundException('Bundle not found');
+    }
+
+    const asset = release.assets[0];
+    if (!existsSync(asset.filePath)) {
+      throw new NotFoundException('Bundle file missing on server');
+    }
+
+    return {
+      release,
+      filePath: asset.filePath,
+      sizeBytes: statSync(asset.filePath).size,
+    };
+  }
+
+  async readBundleFileByReleaseId(releaseId: string): Promise<{ release: MobileRelease; filePath: string; sizeBytes: number }> {
+    const release = await this.prisma.mobileRelease.findFirst({
+      where: { id: releaseId, isPublished: true },
       include: {
         assets: {
           orderBy: { createdAt: 'desc' },

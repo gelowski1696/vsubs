@@ -107,15 +107,20 @@ export class MobileUpdatesController {
     @Query('token') token: string,
     @Res() res: Response,
   ) {
-    if (!token) {
+    let bundle: { release: any; filePath: string; sizeBytes: number };
+
+    if (token) {
+      const tokenPayload = this.mobileUpdatesService.parseSignedDownloadToken(token);
+      if (tokenPayload.releaseId !== id) {
+        throw new BadRequestException('Invalid token release reference');
+      }
+      bundle = await this.mobileUpdatesService.readBundleFile(tokenPayload.clientId, id);
+    } else if (this.mobileUpdatesService.allowUnsignedDownloads()) {
+      bundle = await this.mobileUpdatesService.readBundleFileByReleaseId(id);
+    } else {
       throw new BadRequestException('Download token is required');
     }
-    const tokenPayload = this.mobileUpdatesService.parseSignedDownloadToken(token);
-    if (tokenPayload.releaseId !== id) {
-      throw new BadRequestException('Invalid token release reference');
-    }
 
-    const bundle = await this.mobileUpdatesService.readBundleFile(tokenPayload.clientId, id);
     const data = this.mobileUpdatesService.getBundleBuffer(bundle.filePath);
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', `attachment; filename="${bundle.release.bundleVersion}.zip"`);
