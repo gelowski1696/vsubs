@@ -18,7 +18,12 @@ export class RefreshInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status !== 401 || req.url.includes('/auth/refresh') || req.url.includes('/auth/login')) {
+        if (
+          error.status !== 401 ||
+          req.url.includes('/auth/refresh') ||
+          req.url.includes('/auth/login') ||
+          req.url.includes('/auth/logout')
+        ) {
           return throwError(() => error);
         }
 
@@ -29,8 +34,13 @@ export class RefreshInterceptor implements HttpInterceptor {
         }
 
         return from(this.refreshing).pipe(
+          catchError(() => {
+            void this.auth.handleSessionExpired();
+            return throwError(() => error);
+          }),
           switchMap((token) => {
             if (!token) {
+              void this.auth.handleSessionExpired();
               return throwError(() => error);
             }
             return next.handle(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }));

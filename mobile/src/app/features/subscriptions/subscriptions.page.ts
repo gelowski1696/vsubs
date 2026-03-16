@@ -66,9 +66,9 @@ export class SubscriptionsPage {
       this.errorMessage = null;
       this.lastUpdated = new Date();
     } catch {
-      this.subscriptions = (await this.cache.get<any[]>('subscriptions')) ?? [];
-      this.customers = (await this.cache.get<any[]>('customers')) ?? this.customers;
-      this.plans = (await this.cache.get<any[]>('plans')) ?? this.plans;
+      this.subscriptions = this.extractList(await this.cache.get<any>('subscriptions'));
+      this.customers = this.extractList(await this.cache.get<any>('customers'));
+      this.plans = this.extractList(await this.cache.get<any>('plans'));
       this.stale = true;
       this.errorMessage = 'Unable to sync subscriptions from server.';
       await this.toast.error('Unable to sync subscriptions. Showing cached data.');
@@ -237,8 +237,8 @@ export class SubscriptionsPage {
       this.api.getPlans({ limit: 200 }),
     ]);
 
-    this.customers = (customersRes as any).data ?? [];
-    this.plans = (plansRes as any).data ?? [];
+    this.customers = this.extractList(customersRes);
+    this.plans = this.extractList(plansRes);
     await this.cache.set('customers', this.customers);
     await this.cache.set('plans', this.plans);
   }
@@ -246,8 +246,22 @@ export class SubscriptionsPage {
   private async loadSubscriptions(): Promise<void> {
     const params = this.status === 'ALL' ? {} : { status: this.status };
     const res: any = await this.api.listSubscriptions(params);
-    this.subscriptions = res.data ?? [];
+    this.subscriptions = this.extractList(res);
     await this.cache.set('subscriptions', this.subscriptions);
+  }
+
+  private extractList(response: unknown): any[] {
+    const payload = response as any;
+    if (Array.isArray(payload?.data)) {
+      return payload.data;
+    }
+    if (Array.isArray(payload?.data?.data)) {
+      return payload.data.data;
+    }
+    if (Array.isArray(payload)) {
+      return payload;
+    }
+    return [];
   }
 
   private toIsoDate(input: string): string {

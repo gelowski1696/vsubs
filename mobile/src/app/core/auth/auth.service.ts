@@ -1,17 +1,22 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { Router } from '@angular/router';
 import { TokenStorageService } from './token-storage.service';
 import { resolveApiBaseUrl } from '../config/api-base-url';
+import { ToastService } from '../ui/toast.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   baseUrl = resolveApiBaseUrl();
   clientId = 'subman-mobile';
+  private handlingSessionExpiry = false;
 
   constructor(
     private readonly http: HttpClient,
     private readonly tokenStorage: TokenStorageService,
+    private readonly router: Router,
+    private readonly toast: ToastService,
   ) {}
 
   async login(email: string, password: string) {
@@ -49,16 +54,35 @@ export class AuthService {
     if (!refreshToken) {
       return null;
     }
-    const res: any = await firstValueFrom(
-      this.http.post(
-        `${this.baseUrl}/auth/refresh`,
-        { refreshToken },
-        { headers: { 'X-Client-Id': this.clientId } },
-      ),
-    );
-    const access = res.data.accessToken;
-    const nextRefresh = res.data.refreshToken ?? refreshToken;
-    await this.tokenStorage.setTokens(access, nextRefresh);
-    return access;
+    try {
+      const res: any = await firstValueFrom(
+        this.http.post(
+          `${this.baseUrl}/auth/refresh`,
+          { refreshToken },
+          { headers: { 'X-Client-Id': this.clientId } },
+        ),
+      );
+      const access = res.data.accessToken;
+      const nextRefresh = res.data.refreshToken ?? refreshToken;
+      await this.tokenStorage.setTokens(access, nextRefresh);
+      return access;
+    } catch {
+      return null;
+    }
+  }
+
+  async handleSessionExpired(): Promise<void> {
+    if (this.handlingSessionExpiry) {
+      return;
+    }
+    this.handlingSessionExpiry = true;
+
+    try {
+      await this.tokenStorage.clear();
+      await this.router.navigateByUrl('/login', { replaceUrl: true });
+      await this.toast.info('Session expired. Please sign in again.');
+    } finally {
+      this.handlingSessionExpiry = false;
+    }
   }
 }
