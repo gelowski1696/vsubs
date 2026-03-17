@@ -1,5 +1,33 @@
 # V-SUBS Updates
 
+## 2026-03-17 - APK/OTA Release Automation
+
+### Summary
+Added a one-command release preparation script for mobile APK and OTA packaging.
+
+### Changes Made
+1. Added script: `mobile/scripts/release-prep.mjs`
+- Updates release versions across:
+  - `mobile/package.json`
+  - `mobile/src/app/core/config/app-info.ts`
+  - `mobile/android/app/build.gradle`
+- Can build web assets + Capacitor sync + signed APK.
+- Creates OTA zip from `mobile/dist/mobile`.
+- Generates release manifest with checksums and sizes in `mobile/release/`.
+
+2. Added npm scripts:
+- `npm run -w mobile release:prepare -- --app-version <x> --bundle-version <y> --version-code <n>`
+- `npm run -w mobile release:prepare:dry-run -- --app-version <x> --bundle-version <y> --version-code <n>`
+
+3. Updated release documentation:
+- `docs/APK_UPDATE.md` now includes fast-path automated release flow and flags.
+
+4. Added OTA auto-publish script:
+- `mobile/scripts/ota-publish.mjs`
+- Performs: admin login -> token -> create release -> upload bundle -> publish.
+- New npm script:
+  - `npm run -w mobile ota:publish -- ...`
+
 ## 2026-03-17 - Subscriptions + Mobile UI Stability
 
 ### Summary
@@ -33,4 +61,3 @@ This update resolves subscription management issues in mobile and hardens backen
 - Backend build: `npm run -w backend build`
 - Mobile build: `npm run -w mobile build`
 - Commit: `b01a6ce`
-

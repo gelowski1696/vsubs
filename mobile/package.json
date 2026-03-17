@@ -1,6 +1,6 @@
 {
   "name": "mobile",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "start": "ng serve",
@@ -9,7 +9,10 @@
     "cap:sync": "npx cap sync android",
     "android:open": "npx cap open android",
     "android:release": "cd android && gradlew.bat assembleRelease",
-    "android:release:linux": "cd android && ./gradlew assembleRelease"
+    "android:release:linux": "cd android && ./gradlew assembleRelease",
+    "release:prepare": "node ./scripts/release-prep.mjs",
+    "release:prepare:dry-run": "node ./scripts/release-prep.mjs --dry-run",
+    "ota:publish": "node ./scripts/ota-publish.mjs"
   },
   "dependencies": {
     "@angular/animations": "^18.2.0",
