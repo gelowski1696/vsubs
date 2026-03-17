@@ -215,19 +215,26 @@ export class SubscriptionsPage {
   }
 
   canPause(row: any): boolean {
-    return row?.status === 'ACTIVE' || row?.status === 'TRIALING';
+    const status = this.normalizedStatus(row);
+    return status === 'ACTIVE' || status === 'TRIALING';
   }
 
   canResume(row: any): boolean {
-    return row?.status === 'PAUSED';
+    return this.normalizedStatus(row) === 'PAUSED';
   }
 
   canCancel(row: any): boolean {
-    return row?.status !== 'CANCELED' && row?.status !== 'EXPIRED';
+    const status = this.normalizedStatus(row);
+    return status === 'ACTIVE' || status === 'PAUSED' || status === 'TRIALING';
+  }
+
+  canEdit(row: any): boolean {
+    const status = this.normalizedStatus(row);
+    return status === 'ACTIVE' || status === 'PAUSED' || status === 'TRIALING';
   }
 
   canDelete(row: any): boolean {
-    const status = String(row?.status ?? '').toUpperCase();
+    const status = this.normalizedStatus(row);
     return status !== 'ACTIVE' && status !== 'PAUSED';
   }
 
@@ -259,6 +266,10 @@ export class SubscriptionsPage {
       .toLowerCase()
       .replace(/_/g, ' ')
       .replace(/\b\w/g, (m) => m.toUpperCase());
+  }
+
+  private normalizedStatus(row: any): string {
+    return String(row?.status ?? '').toUpperCase();
   }
 
   private async loadReferences(): Promise<void> {

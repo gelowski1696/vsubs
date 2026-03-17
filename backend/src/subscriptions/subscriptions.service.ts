@@ -31,6 +31,12 @@ export class SubscriptionsService {
 
     const plan = await this.plansService.findOne(clientId, dto.planId);
     const startDate = new Date(dto.startDate);
+    if (Number.isNaN(startDate.getTime())) {
+      throw new BadRequestException('Invalid start date');
+    }
+    if (!plan.intervalCount || plan.intervalCount < 1) {
+      throw new BadRequestException('Plan interval count must be at least 1');
+    }
     const nextBillingDate = addInterval(startDate, plan.interval as PlanInterval, plan.intervalCount);
 
     let row;
@@ -64,7 +70,12 @@ export class SubscriptionsService {
       entityId: row.id,
       metadata: { dto },
     });
-    await this.webhooksService.emit(clientId, 'subscription_created', row);
+    try {
+      await this.webhooksService.emit(clientId, 'subscription_created', row);
+    } catch (error) {
+      // Avoid failing primary flow if webhook queueing fails.
+      console.error('Failed to queue subscription_created webhooks', error);
+    }
     return row;
   }
 

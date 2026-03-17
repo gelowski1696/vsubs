@@ -111,7 +111,7 @@ ion-tab-bar.app-tab-bar {
 
 /* Keep content clear of the custom fixed bottom nav used in tabs. */
 .tabs-shell ion-content {
-  --padding-bottom: calc(env(safe-area-inset-bottom) + 112px);
+  --padding-bottom: calc(env(safe-area-inset-bottom) + 124px);
 }
 
 :root.dark .page-directory-intro h2 {
