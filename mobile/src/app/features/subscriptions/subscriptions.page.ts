@@ -91,6 +91,11 @@ export class SubscriptionsPage {
   }
 
   createSubscription(): void {
+    if (this.customers.length === 0 || this.plans.length === 0) {
+      void this.toast.info('Create at least one customer and one plan first.');
+      return;
+    }
+
     this.editingSubscriptionId = null;
     this.formModel = {
       customerId: this.customers[0]?.id ?? '',
@@ -221,6 +226,34 @@ export class SubscriptionsPage {
     return row?.status !== 'CANCELED' && row?.status !== 'EXPIRED';
   }
 
+  canDelete(row: any): boolean {
+    const status = String(row?.status ?? '').toUpperCase();
+    return status !== 'ACTIVE' && status !== 'PAUSED';
+  }
+
+  async deleteSubscription(row: any): Promise<void> {
+    if (!row?.id || !this.canDelete(row)) {
+      return;
+    }
+
+    const confirmed = typeof window !== 'undefined'
+      ? window.confirm('Delete this subscription permanently?')
+      : true;
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await this.api.deleteSubscription(row.id);
+      await this.toast.success('Subscription deleted.');
+      await this.load();
+    } catch (error) {
+      this.errorMessage = this.getApiErrorMessage(error, 'Failed to delete subscription.');
+      await this.toast.error(this.errorMessage);
+    }
+  }
+
   formatStatus(status?: string): string {
     return String(status || 'UNKNOWN')
       .toLowerCase()
@@ -297,6 +330,9 @@ export class SubscriptionsPage {
       }
       if (typeof payload?.message === 'string' && payload.message.length > 0) {
         return payload.message;
+      }
+      if (typeof payload?.error?.message === 'string' && payload.error.message.length > 0) {
+        return payload.error.message;
       }
       if (typeof error.message === 'string' && error.message.length > 0) {
         return error.message;

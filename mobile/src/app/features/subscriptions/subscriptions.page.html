@@ -61,6 +61,7 @@
         <button type="button" class="btn btn-secondary btn-sm" (click)="pause(s.id)" [disabled]="!canPause(s)">Pause</button>
         <button type="button" class="btn btn-secondary btn-sm" (click)="resume(s.id)" [disabled]="!canResume(s)">Resume</button>
         <button type="button" class="btn btn-danger btn-sm" (click)="openCancel(s)" [disabled]="!canCancel(s)">Cancel</button>
+        <button type="button" class="btn btn-danger btn-sm" (click)="deleteSubscription(s)" [disabled]="!canDelete(s)">Delete</button>
       </div>
     </article>
   </section>

@@ -10,6 +10,11 @@
   font-weight: 700;
 }
 
+.btn:disabled {
+  opacity: 0.55;
+  filter: grayscale(0.2);
+}
+
 .btn-primary {
   color: #fff;
   background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);

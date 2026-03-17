@@ -49,6 +49,10 @@ export class SubmanApiService {
     return firstValueFrom(this.http.patch(`${this.baseUrl}/subscriptions/${id}`, payload));
   }
 
+  deleteSubscription(id: string) {
+    return firstValueFrom(this.http.delete(`${this.baseUrl}/subscriptions/${id}`));
+  }
+
   listSubscriptions(params: any = {}) {
     return firstValueFrom(this.http.get(`${this.baseUrl}/subscriptions`, { params }));
   }

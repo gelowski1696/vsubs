@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PlansService } from '../plans/plans.service';
@@ -22,23 +22,38 @@ export class SubscriptionsService {
   ) {}
 
   async create(clientId: string, dto: CreateSubscriptionDto, actorId?: string) {
+    const customer = await this.prisma.customer.findFirst({
+      where: { id: dto.customerId, clientId },
+    });
+    if (!customer) {
+      throw new NotFoundException('Customer not found');
+    }
+
     const plan = await this.plansService.findOne(clientId, dto.planId);
     const startDate = new Date(dto.startDate);
     const nextBillingDate = addInterval(startDate, plan.interval as PlanInterval, plan.intervalCount);
 
-    const row = await this.prisma.subscription.create({
-      data: {
-        clientId,
-        customerId: dto.customerId,
-        planId: dto.planId,
-        startDate,
-        endDate: dto.endDate ? new Date(dto.endDate) : null,
-        status: dto.status ?? 'ACTIVE',
-        autoRenew: dto.autoRenew ?? true,
-        nextBillingDate,
-        cancelReason: dto.cancelReason,
-      },
-    });
+    let row;
+    try {
+      row = await this.prisma.subscription.create({
+        data: {
+          clientId,
+          customerId: dto.customerId,
+          planId: dto.planId,
+          startDate,
+          endDate: dto.endDate ? new Date(dto.endDate) : null,
+          status: dto.status ?? 'ACTIVE',
+          autoRenew: dto.autoRenew ?? true,
+          nextBillingDate,
+          cancelReason: dto.cancelReason,
+        },
+      });
+    } catch (error: any) {
+      if (error?.code === 'P2003') {
+        throw new BadRequestException('Invalid customer or plan reference');
+      }
+      throw error;
+    }
 
     await this.auditLogs.log({
       clientId,
@@ -92,7 +107,10 @@ export class SubscriptionsService {
   }
 
   async remove(clientId: string, id: string) {
-    await this.findOne(clientId, id);
+    const row = await this.findOne(clientId, id);
+    if (row.status === 'ACTIVE' || row.status === 'PAUSED') {
+      throw new BadRequestException('Cannot delete ACTIVE or PAUSED subscriptions');
+    }
     await this.prisma.subscription.delete({ where: { id } });
     return { deleted: true };
   }
