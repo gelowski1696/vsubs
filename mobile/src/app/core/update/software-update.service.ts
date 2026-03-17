@@ -106,7 +106,7 @@ export class SoftwareUpdateService {
       });
 
       const payload = response?.data ?? response;
-      const releaseId = payload?.bundle?.id ?? null;
+      const releaseId = payload?.releaseId ?? payload?.bundle?.releaseId ?? null;
       const bundle = payload?.bundle
         ? {
             id: payload.bundle.id,

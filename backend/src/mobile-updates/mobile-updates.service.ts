@@ -262,20 +262,24 @@ export class MobileUpdatesService {
       minVersion && this.compareVersions(dto.appVersion, minVersion) < 0,
     );
 
-    const updateAvailable = appBelowMinimum || dto.bundleVersion !== latestRelease.bundleVersion;
+    const isCurrentBundle =
+      dto.bundleVersion === latestRelease.bundleVersion || dto.bundleVersion === latestRelease.id;
+    const updateAvailable = appBelowMinimum || !isCurrentBundle;
 
     const token = this.createSignedDownloadToken(clientId, latestRelease.id);
     const bundleUrl = `/v1/mobile-updates/releases/${latestRelease.id}/bundle?token=${encodeURIComponent(token)}`;
 
     return {
       updateAvailable,
+      releaseId: latestRelease.id,
       latestAppVersion: latestRelease.appVersion,
       minimumSupportedAppVersion: minVersion,
       mandatory: latestRelease.mandatory || appBelowMinimum,
       releaseNotes: latestRelease.releaseNotes,
       bundle: updateAvailable
         ? {
-            id: latestRelease.id,
+            id: latestRelease.bundleVersion,
+            releaseId: latestRelease.id,
             url: bundleUrl,
             checksumSha256: latestAsset.checksumSha256,
             sizeBytes: latestAsset.sizeBytes,
