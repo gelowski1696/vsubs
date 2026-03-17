@@ -39,6 +39,19 @@ export class CapgoRuntimeAdapter implements UpdateRuntimeAdapter {
     }
   }
 
+  async notifyAppReady(): Promise<void> {
+    const plugin = this.getPlugin();
+    if (!plugin || typeof plugin.notifyAppReady !== 'function') {
+      return;
+    }
+
+    try {
+      await plugin.notifyAppReady();
+    } catch {
+      // Best effort. If unsupported or transiently failing, keep app usable.
+    }
+  }
+
   async downloadAndApply(bundle: OtaBundlePayload): Promise<void> {
     const plugin = this.getPlugin();
     if (!plugin) {

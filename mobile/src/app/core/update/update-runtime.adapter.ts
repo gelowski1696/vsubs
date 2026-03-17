@@ -8,5 +8,6 @@ export type OtaBundlePayload = {
 export interface UpdateRuntimeAdapter {
   isAvailable(): Promise<boolean>;
   getCurrentBundleVersion(defaultVersion: string): Promise<string>;
+  notifyAppReady(): Promise<void>;
   downloadAndApply(bundle: OtaBundlePayload): Promise<void>;
 }

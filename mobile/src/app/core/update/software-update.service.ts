@@ -68,6 +68,9 @@ export class SoftwareUpdateService {
     this.initialized = true;
 
     const runtimeAvailable = await this.runtime.isAvailable();
+    if (runtimeAvailable) {
+      await this.runtime.notifyAppReady();
+    }
     const bundleVersion = await this.runtime.getCurrentBundleVersion(APP_INFO.bundleVersion);
     this.patch({ runtimeAvailable, bundleVersion });
 
